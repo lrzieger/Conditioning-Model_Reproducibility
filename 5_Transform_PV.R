@@ -1,8 +1,6 @@
 
 # Combine the PVs and transform them  -------------------------------------
 
-##
-
 ## Set working direction and load the data
 # pisa.pv: reported plausible values
 # own.pv: self-computed plausible values
@@ -22,6 +20,8 @@ input <- list(pisa.pv = paste0("1_Data/PA12_PV-pv", b, a, ".RData"),
               book.dat = "1_Data/PA12_bookid_dat.RData",
               wgt.dat = "1_Data/PA12_weights.RData")
 
+
+## Load PISA and self-computed plausible values
 load(input$pisa.pv)
 load(input$own.pv)
 
@@ -35,20 +35,24 @@ load(input$own.pv)
 # 6: Individual direct and indirect regressors
 # 7: Full conditioning
 
+## Load weight data 
 load(input$wgt.dat)
 
 ## Load required packages
 library(dplyr)
 
 
-#-----------------------------------------------------------------------------------------
+# Merge data and lists ----------------------------------------------------
 
-## Make equivalent to pid in pvs
+
+## Make equivalent ID to the ID in the self-computed PVs
 pa12_pv$pid <- with(pa12_pv, ave(rep(1, nrow(pa12_pv)), CNT, FUN = seq_along))
 pa12_wgt$pid <- with(pa12_wgt, ave(rep(1, nrow(pa12_wgt)), CNT, FUN = seq_along))
 
-## Rearrange
+## Rearrange PISA plausible values
 pa12_pv <- pa12_pv[, c(2, 20, 5:19)]
+
+## Create suffixes which you would like the plausible values to have
 sfx <- paste0(".v", 0:7)
 # 0: Nothing
 # 1: SchoolID
@@ -59,23 +63,16 @@ sfx <- paste0(".v", 0:7)
 # 6: Background and PCA
 # 7: Full mod
 
-## Combine the different plausible values of the list to one data.frame 
+## Combine the different plausible values of one country 
+## Plausible values in data frame which is stored in a list 
 pvs_comb <- pvs[[1]]
 for(i in c(1:7)) {
   pvs_comb <- merge(pvs_comb, pvs[[i+1]], all = TRUE, 
-                    suffixes = sfx[i:(i+1)], by = c("cnt", "pid"))
+                    suffixes = sfx[i:(i+1)], by = c("pid"))
 }
 
-
-## Extract country only (larger samples were split into Xcnt)
-pvs_comb$cnt <- stringr::str_sub(pvs_comb$cnt, -3, -1)
-# Rearrange plausible values, so domains are displayed together
-pvs_comb <- pvs_comb[, c(1, 2, seq(from = 3, to = 242, by = 6), 
-                         seq(from = 4, to = 242, by = 6), 
-                         seq(from = 5, to = 242, by = 6), 
-                         seq(from = 6, to = 242, by = 6), 
-                         seq(from = 7, to = 242, by = 6), 
-                         seq(from = 8, to = 242, by = 6))]
+## Add country name to the data set
+pvs_comb$cnt <- "DEU"
 
 ## Merge reported plausible values to the data set
 pvs_comb <- merge(pa12_pv, pvs_comb, by.x = c("CNT", "pid"), by.y = c("cnt", "pid"),
@@ -88,30 +85,35 @@ pvs_comb <- merge(pvs_comb, pa12_wgt, all = T)
 rm(pa12_pv, pvs, pa12_wgt)
 
 
-#-----------------------------------------------------------------------------------------------#
-# Bring PVs on common scale 
-# 1. Add booklet parameters from the technical report
-# 2. Transform plausible values onto the common scale. Equations from TR
 
-# Load booklet parameter and data
+
+
+# Add booklet effects -----------------------------------------------------
+
+
+# Load booklet parameter and data. The table was copied from the technical report.
 book_eff <- xlsx::read.xlsx(input$booklets, 1)
 load(input$book.dat)
 
 # Add indicator if book belongs to the easier booklets
 book_eff$EASY <- ifelse(book_eff$Set. == "Easy", 1, 0)
 
-
 # Combine booklet data and plausible values
 pvs_comb <- merge(pvs_comb, book_dat)
 
 
-############################
-### Add booklet parameters
-
-## Add mathematics booklet parameter
+## Add mathematics booklet parameter. 
+## The code follows the description in techncial report on page 242
 for(i in 1:26){
+  
+  # Select the columns of mathematics PVs
   whi_dom <- which(stringr::str_detect(names(pvs_comb), "Dim1"))
+  
+  # Select students which took the right combination of booklet ID and easy/
+  # difficult items (effects varied).
   whi_stud <- which(pvs_comb$BOOKID == book_eff$Number[i] & pvs_comb$EASY == book_eff$EASY[i])
+  
+  # Add the effect
   for(j in whi_dom){
     pvs_comb[whi_stud , j] <- pvs_comb[whi_stud, j] + book_eff$Mathematics[i]
   }
@@ -119,8 +121,15 @@ for(i in 1:26){
 
 ## Add reading booklet parameters
 for(i in which(!(is.na(book_eff$Reading.)))){
+  
+  # Select the columns of reading PVs
   whi_dom <- which(stringr::str_detect(names(pvs_comb), "Dim2"))
+  
+  # Select students which took the right combination of booklet ID and easy/
+  # difficult items (effects varied).
   whi_stud <- which(pvs_comb$BOOKID == book_eff$Number[i] & pvs_comb$EASY == book_eff$EASY[i])
+  
+  # Add the effect
   for(j in whi_dom){
     pvs_comb[whi_stud , j] <- pvs_comb[whi_stud, j] + book_eff$Reading.[i]
   }
@@ -128,35 +137,55 @@ for(i in which(!(is.na(book_eff$Reading.)))){
 
 ## Add science booklet parameters
 for(i in which(!(is.na(book_eff$Science)))){
+  
+  # Select the columns of science PVs
   whi_dom <- which(stringr::str_detect(names(pvs_comb), "Dim3"))
+  
+  # Select students which took the right combination of booklet ID and easy/
+  # difficult items (effects varied).
   whi_stud <- which(pvs_comb$BOOKID == book_eff$Number[i] & pvs_comb$EASY == book_eff$EASY[i])
+  
+  # Add the effect
   for(j in whi_dom){
     pvs_comb[whi_stud , j] <- pvs_comb[whi_stud, j] + book_eff$Science[i]
   }
 }
 
 
-###############################
-### Do the transformations
 
-## Mathematic transformation (see TR 2012)
+
+
+# Transform onto a common scale -------------------------------------------
+
+## Transform the plausible values onto a common scale. Equations are taken from
+## the technical report page.
+
+## Transformation for mathematics, p.253
+# Select the columns of maths PVs
 whi_math <- which(stringr::str_detect(names(pvs_comb), "Dim1"))
 pvs_comb[, whi_math] <- ((pvs_comb[, whi_math] + 0.0981 - 0.07) / 1.2838) * 100 + 500
 
-## Reading transformation -- split by gender (see TR 2012)
+## Transformation for reading, p.253 & 254
+# Select the columns of reading PVs
 whi_read <- which(stringr::str_detect(names(pvs_comb), "Dim2"))
-pvs_comb[, whi_read] <- (pvs_comb[, whi_read] - 0.0274) 
+pvs_comb[, whi_read] <- (pvs_comb[, whi_read] - 0.0274)
+# There are two different versions of the equation for males and females
+# Select them and apply respectively
 whi_fem <- which(pvs_comb$female == 1)
 whi_male <- which(pvs_comb$female == 0)
 pvs_comb[whi_fem, whi_read] <- ((0.8739 * pvs_comb[whi_fem, whi_read] - 0.4655) / 1.1002) * 100 + 500
 pvs_comb[whi_male, whi_read] <- ((0.88823 * pvs_comb[whi_male, whi_read] - 0.5427) / 1.1002) * 100 + 500
 
-## Science transformation (see TR 2012)
+## Transformation for science, p.254
+# Select the columns of science PVs
 whi_scie <- which(stringr::str_detect(names(pvs_comb), "Dim3"))
 pvs_comb[, whi_scie] <- ((pvs_comb[, whi_scie] - 0.1646) / 1.0724) * 100 + 500
 
 
-##############################
+
+
+# Select the core domains -------------------------------------------------
+
 
 ## Remove domains which we are not interested in (PS, DR, DM)
 whi_not <- which(stringr::str_detect(names(pvs_comb), "Dim4") |
@@ -166,7 +195,10 @@ whi_not <- which(stringr::str_detect(names(pvs_comb), "Dim4") |
 pvs_comb <- pvs_comb[, -whi_not]
 
 
-####################################################################################
+
+
+# Save data ---------------------------------------------------------------
+
 
 ## Save data 
-save(pvs_comb,  file = "3_Results/Data/PVs_transformed_final.RData")
+save(pvs_comb,  file = "4_Results/PVs_transformed.RData")
