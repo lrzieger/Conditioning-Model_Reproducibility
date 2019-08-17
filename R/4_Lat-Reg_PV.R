@@ -27,7 +27,7 @@ source("2_R-Syntax/4H_PV_helper.R")
 a <- "DEU"
 
 ## Choose a seed
-seed_a <- 845529
+seed_a <- 12345
 
 ## And the respective subset if necessary (country has more than 10000 
 ## participants) --> either "" or 1, 2, 3 or 4
@@ -60,7 +60,6 @@ dig_part <- subset(dig_part, CNT == a)
 pvs <- list()
 
 
-
 ## Different versions of the conditioning variables
 con_dat_opt <- list(
   school = c(1, which(startsWith(names(con_dat), "schoolid"))),
@@ -79,36 +78,34 @@ con_dat_opt <- list(
 
 if(!(dig_part$PS) | dig_part$Subset){
   
-  pvs[[1]] <- try(run.pv(mod, 
-                         MCMC = F, conditioning = F, iter.2 = 10000,
+  pvs[[1]] <- try(run.pv(mod, conditioning = F, iter.2 = 10000,
                          seed.2 = seed_a, samp.regr.opt = F)$pv)
   
   pvs[[2]] <- try(run.pv(mod, con_dat[, con_dat_opt$school],
-                         MCMC = F, conditioning = T, iter.2 = 10000,
+                         conditioning = T, iter.2 = 10000,
                          seed.2 = seed_a, samp.regr.opt = F)$pv)
 
   pvs[[3]] <- try(run.pv(mod, con_dat[, con_dat_opt$back],
-                         MCMC = F, conditioning = T, iter.2 = 10000,
+                         conditioning = T, iter.2 = 10000,
                          seed.2 = seed_a, samp.regr.opt = F)$pv)
 
   pvs[[4]] <- try(run.pv(mod, con_dat[, con_dat_opt$pc],
-                         MCMC = F, conditioning = T, iter.2 = 10000,
+                         conditioning = T, iter.2 = 10000,
                          seed.2 = seed_a, samp.regr.opt = F)$pv)
 
   pvs[[5]] <- try(run.pv(mod, con_dat[, con_dat_opt$sb],
-                         MCMC = F, conditioning = T, iter.2 = 10000,
+                         conditioning = T, iter.2 = 10000,
                          seed.2 = seed_a, samp.regr.opt = F)$pv)
 
   pvs[[6]] <- try(run.pv(mod, con_dat[, con_dat_opt$sp], 
-                         MCMC = F, conditioning = T, iter.2 = 10000,
+                         conditioning = T, iter.2 = 10000,
                          seed.2 = seed_a, samp.regr.opt = F)$pv)
 
   pvs[[7]] <- try(run.pv(mod, con_dat[, con_dat_opt$bp], 
-                         MCMC = F, conditioning = T, iter.2 = 10000,
+                         conditioning = T, iter.2 = 10000,
                          seed.2 = seed_a, samp.regr.opt = F))
   
-  pvs[[8]] <- try(run.pv(mod, con_dat, 
-                         MCMC = F, conditioning = T, iter.2 = 10000,
+  pvs[[8]] <- try(run.pv(mod, con_dat, conditioning = T, iter.2 = 10000,
                          seed.2 = seed_a, samp.regr.opt = F)$pv)
 
 }
@@ -127,39 +124,36 @@ if(dig_part$PS & !(dig_part$Subset)){
   load(path2)
   mod_dig <- get(paste0(paste0("mod_md_", b, a)))
   
-  pvs[[1]] <- try(run.pv.md(mod, 
-                            MCMC = F, conditioning = F, iter.2 = 10000,
+  pvs[[1]] <- try(run.pv.md(mod, conditioning = F, iter.2 = 10000,
                             seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
 
   pvs[[2]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$school], 
-                            MCMC = F, conditioning = T, iter.2 = 10000,
+                            conditioning = T, iter.2 = 10000,
                             seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
 
   pvs[[3]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$back], 
-                            MCMC = F, conditioning = T, iter.2 = 10000,
+                            conditioning = T, iter.2 = 10000,
                             seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
 
   pvs[[4]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$pc], 
-                            MCMC = F, conditioning = T, iter.2 = 10000,
+                            conditioning = T, iter.2 = 10000,
                             seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
 
   pvs[[5]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$sb], 
-                            MCMC = F, conditioning = T, iter.2 = 10000,
+                            conditioning = T, iter.2 = 10000,
                             seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
 
   pvs[[6]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$sp], 
-                            MCMC = F, conditioning = T, iter.2 = 10000,
+                            conditioning = T, iter.2 = 10000,
                             seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
 
   pvs[[7]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$bp], 
-                            MCMC = F, conditioning = T, iter.2 = 10000,
+                            conditioning = T, iter.2 = 10000,
                             seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
   
-  pvs[[8]] <- try(run.pv.md(mod, con_dat, 
-                            MCMC = F, conditioning = T, iter.2 = 10000,
+  pvs[[8]] <- try(run.pv.md(mod, con_dat, conditioning = T, iter.2 = 10000,
                             seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
   
-
 }
 
 
@@ -170,4 +164,5 @@ if(dig_part$PS & !(dig_part$Subset)){
 assign(paste0("pvs_", b, a), pvs)
 
 ## Save
-save(list = paste0("pvs_", b, a), file = paste0("PA12_PV-pv-", b, a, ".RData"))
+save(list = paste0("pvs_", b, a), 
+     file = paste0("3_Models/PA12_PV-pv-", b, a, ".RData"))
