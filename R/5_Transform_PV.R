@@ -14,8 +14,8 @@ a <- "DEU"
 ## Select subset if more than 10000 participating students (b is then 1, 2, ...)
 b <- ""
 
-input <- list(pisa.pv = paste0("1_Data/PA12_PV-pv", b, a, ".RData"),
-              own.pv = "3_Models/PA12_Combined_PVs_final.RData",
+input <- list(pisa.pv = "1_Data/PA12_plausible_values.RData",
+              own.pv = paste0("3_Models/PA12_PV-pv-", b, a, ".RData"),
               booklets = "1_Data/Booklet_Effects.xlsx",
               book.dat = "1_Data/PA12_bookid_dat.RData",
               wgt.dat = "1_Data/PA12_weights.RData")
@@ -44,6 +44,8 @@ library(dplyr)
 
 # Merge data and lists ----------------------------------------------------
 
+## Rename country-specific plausible value data set
+pvs <- pvs_DEU
 
 ## Make equivalent ID to the ID in the self-computed PVs
 pa12_pv$pid <- with(pa12_pv, ave(rep(1, nrow(pa12_pv)), CNT, FUN = seq_along))
@@ -76,10 +78,10 @@ pvs_comb$cnt <- "DEU"
 
 ## Merge reported plausible values to the data set
 pvs_comb <- merge(pa12_pv, pvs_comb, by.x = c("CNT", "pid"), by.y = c("cnt", "pid"),
-                  all = T)
+                  all.y = T)
 
 ## Merge weights to data set 
-pvs_comb <- merge(pvs_comb, pa12_wgt, all = T)
+pvs_comb <- merge(pvs_comb, pa12_wgt, all.x = T)
 
 ## Remove all (now) unnecessary data
 rm(pa12_pv, pvs, pa12_wgt)
@@ -201,4 +203,4 @@ pvs_comb <- pvs_comb[, -whi_not]
 
 
 ## Save data 
-save(pvs_comb,  file = "4_Results/PVs_transformed.RData")
+save(pvs_comb,  file = paste0("4_Results/PVs_transformed_", a, ".RData"))
