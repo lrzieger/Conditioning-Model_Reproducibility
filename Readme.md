@@ -58,7 +58,7 @@ Generally, the R code numbers belong to the following steps:
 - 3: Run IRT models
 - 4: Compute latent regression and plausible values 
 - 5: Transform plausible values onto PISA scale
-- 6: Examples for analysing the plausible values 
+- Afterwards the plausible can be analysed, we used the plausible values in combination with "PA12_weights.RData" and the package [intsvy](https://cran.r-project.org/web/packages/intsvy/intsvy.pdf) to account for the complex sampling. 
 
 ## 3_Models
 
