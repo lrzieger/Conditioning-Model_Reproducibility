@@ -18,9 +18,12 @@ library(TAM)
 run.pv <- function(mod1, con_dat = NULL, seed.2 = 4385697, iter.2 = 10000, n.pv = 5, 
                    conditioning = T,  samp.regr.opt = F){
   
-  ## Check that conditioning data is present when conditioning is done
-  if(confitioning){
+  ## Check that conditioning data is present when conditioning is done and 
+  ## remove constant columns
+  if(conditioning){
     stopifnot(!is.null(con_dat))
+    con_dat <- con_dat[mod1$pid, ]
+    con_dat <- con_dat[, unlist(lapply(con_dat, function(x) dplyr::n_distinct(x) > 1))]
   }
   
   ## Set seed for the computations
@@ -79,9 +82,16 @@ run.pv.md <- function(mod1, con_dat = NULL,  seed.2 = 4385697, iter.2 = 5000,
                       mod2 = mod_dig, n.pv = 5, conditioning = T, 
                       samp.regr.opt = F){
   
-  ## Check that conditioning data is present when conditioning is done
-  if(confitioning){
+  con_dat1 <- con_dat
+  
+  ## Check that conditioning data is present when conditioning is done and 
+  ## remove constant columns
+  if(conditioning){
     stopifnot(!is.null(con_dat))
+    con_dat <- con_dat[mod2$pid, ]
+    con_dat <- con_dat[, unlist(lapply(con_dat, function(x) dplyr::n_distinct(x) > 1))]
+    con_dat1 <- con_dat1[mod1$pid, ]
+    con_dat1 <- con_dat1[, unlist(lapply(con_dat1, function(x) dplyr::n_distinct(x) > 1))]
   }
 
   ## Set seed for the computations
@@ -96,7 +106,7 @@ run.pv.md <- function(mod1, con_dat = NULL,  seed.2 = 4385697, iter.2 = 5000,
     
     # Compute latent regression of the latent ability on the conditioning 
     # variables (excl. the first column which is the student ID)
-    latreg <- tam.latreg(likeli, Y = con_dat[, -1], pweights = wgt.dat, 
+    latreg <- tam.latreg(likeli, Y = con_dat1[, -1], 
                          control = list(maxiter = iter.2, acceleration = "Ramsay"))
     
     # Extract the regression coefficients of the conditioning variables, because
