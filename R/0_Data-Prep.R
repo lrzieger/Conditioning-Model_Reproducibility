@@ -28,6 +28,11 @@ pa12_pv <- pa12_stud[c("StIDStd", "CNT", "SCHOOLID", "OECD",
                        paste0("PV", 1:5, rep(c("MATH", "READ", "SCIE"), 
                                              each = 5)))]
 
+## Extract weights
+pa12_wgt <- pa12_stud[c("CNT", "SUBNATIO", "STRATUM", "OECD", "NC", "SCHOOLID",
+                        "StIDStd", "W_FSTUWT", paste0("W_FSTR", 1:80), "WVARSTRR", 
+                        "VAR_UNIT", "senwgt_STU", "VER_STU")]
+
 ## Extract country, gender, bookid and the indicator if it is the easy version 
 ## of PISA. Add a student ID for each country by just counting along the 
 ## observations
@@ -75,18 +80,16 @@ for(i in 9:214){
 }
 
 ## Recode not reached (8) and not administered (7) to NAs
-for(i in 9:214){
-  pa12_resp_s[, i] <- car::recode(pa12_resp_s[, i], "c(7, 8) = NA")
-}
+pa12_resp_s[, 9:214] <- lapply(pa12_resp_s[, 9:214], 
+                               function(x) car::recode(x, "c(7, 8) = NA"))
 
 ## Change the structure of the test responses from factor to numeric 
-for(i in 9:214){
-  pa12_resp_s[, i] <- as.numeric(as.character(pa12_resp_s[, i]))
-}
+pa12_resp_s[, 9:214] <- lapply(pa12_resp_s[, 9:214], 
+                               function(x) as.numeric(as.character(x)))
 
 ## Removing the unnecessary data from regions (not used for scaling):
 ## Perm (QRS; Russia), Florida (QUA; USA), Connecticut (QUB; USA),
-## Massachusetts (QUC; USA) 
+## Massachusetts (QUC; USA)
 pa12_resp_s <- subset(pa12_resp_s, !(CNT %in% c("QRS", "QUA", "QUB", "QUC")))
 
 
@@ -96,3 +99,4 @@ pa12_resp_s <- subset(pa12_resp_s, !(CNT %in% c("QRS", "QUA", "QUB", "QUC")))
 save(pa12_resp_s, file = "1_Data/PA12_responses_scored_prepared.RData")
 save(pa12_pv, file = "1_Data/PA12_plausible_values.RData")
 save(book_dat, file = "1_Data/PA12_bookid_dat.RData")
+save(pa12_wgt, file = "1_Data/PA12_weights.RData")
