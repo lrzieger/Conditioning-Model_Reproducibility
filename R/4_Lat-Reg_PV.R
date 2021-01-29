@@ -87,7 +87,8 @@ if(!(dig_part$PS) | dig_part$Subset){
 
   pvs[[3]] <- try(run.pv(mod, con_dat[, con_dat_opt$back],
                          conditioning = T, iter.2 = 10000,
-                         seed.2 = seed_a, samp.regr.opt = F)$pv)
+                         seed.2 = seed_a, samp.regr.opt = F,
+                         books.zero = T)$pv)
 
   pvs[[4]] <- try(run.pv(mod, con_dat[, con_dat_opt$pc],
                          conditioning = T, iter.2 = 10000,
@@ -95,7 +96,8 @@ if(!(dig_part$PS) | dig_part$Subset){
 
   pvs[[5]] <- try(run.pv(mod, con_dat[, con_dat_opt$sb],
                          conditioning = T, iter.2 = 10000,
-                         seed.2 = seed_a, samp.regr.opt = F)$pv)
+                         seed.2 = seed_a, samp.regr.opt = F,
+                         books.zero = T)$pv)
 
   pvs[[6]] <- try(run.pv(mod, con_dat[, con_dat_opt$sp], 
                          conditioning = T, iter.2 = 10000,
@@ -103,10 +105,12 @@ if(!(dig_part$PS) | dig_part$Subset){
 
   pvs[[7]] <- try(run.pv(mod, con_dat[, con_dat_opt$bp], 
                          conditioning = T, iter.2 = 10000,
-                         seed.2 = seed_a, samp.regr.opt = F))
+                         seed.2 = seed_a, samp.regr.opt = F,
+                         books.zero = T)$pv)
   
   pvs[[8]] <- try(run.pv(mod, con_dat, conditioning = T, iter.2 = 10000,
-                         seed.2 = seed_a, samp.regr.opt = F)$pv)
+                         seed.2 = seed_a, samp.regr.opt = F,
+                         books.zero = T)$pv)
 
 }
 
@@ -133,7 +137,8 @@ if(dig_part$PS & !(dig_part$Subset)){
 
   pvs[[3]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$back], 
                             conditioning = T, iter.2 = 10000,
-                            seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
+                            seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig,
+                            books.zero = T)$pv)
 
   pvs[[4]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$pc], 
                             conditioning = T, iter.2 = 10000,
@@ -141,7 +146,8 @@ if(dig_part$PS & !(dig_part$Subset)){
 
   pvs[[5]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$sb], 
                             conditioning = T, iter.2 = 10000,
-                            seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
+                            seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig,
+                            books.zero = T)$pv)
 
   pvs[[6]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$sp], 
                             conditioning = T, iter.2 = 10000,
@@ -149,10 +155,12 @@ if(dig_part$PS & !(dig_part$Subset)){
 
   pvs[[7]] <- try(run.pv.md(mod, con_dat[, con_dat_opt$bp], 
                             conditioning = T, iter.2 = 10000,
-                            seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
+                            seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig,
+                            books.zero = T)$pv)
   
   pvs[[8]] <- try(run.pv.md(mod, con_dat, conditioning = T, iter.2 = 10000,
-                            seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig)$pv)
+                            seed.2 = seed_a, samp.regr.opt = F, mod2 = mod_dig,
+                            books.zero = T)$pv)
   
 }
 
