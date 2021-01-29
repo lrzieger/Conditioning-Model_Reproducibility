@@ -97,6 +97,9 @@ run.pv <- function(mod1, con_dat = NULL, seed.2 = 4385697, iter.2 = 10000, n.pv 
 #         conditioning  - logical: Should conditioning be used (default TRUE)
 #         samp.regr.opt - logical: Should regression coefficients be sampled in 
 #                         the plausible value imputation or fixed (default F)
+#         books.zero    - logical: Should the latent regression coefficients for
+#                         the booklet IDs which only cover two domains be set to 
+#                         0 for the third
 ## Output: Object of tam.pv - Values from the computation incl. the PVs 
 
 run.pv.md <- function(mod1, con_dat = NULL,  seed.2 = 4385697, iter.2 = 5000, 
@@ -125,10 +128,29 @@ run.pv.md <- function(mod1, con_dat = NULL,  seed.2 = 4385697, iter.2 = 5000,
     # Extract IRT likelihood of the first model (only math, read and scie)
     likeli <- IRT.likelihood(mod1)
     
-    # Compute latent regression of the latent ability on the conditioning 
-    # variables (excl. the first column which is the student ID)
-    latreg <- tam.latreg(likeli, Y = con_dat1[, -1], 
-                         control = list(maxiter = iter.2, acceleration = "Ramsay"))
+    # Check whether the regression coefficient for the booklets which do not 
+    # contribute to a domain should be set a zero
+    if(books.zero){
+      
+      # Set the latent regression coefficients for booklet 1, 5, 7 and 10 for reading and
+      # booklet 4, 6, 9 and 11 for science to 0
+      betas <- data.frame(var = c(which(names(con_dat) %in% paste0("bookid.", c(1, 5, 7, 10))),
+                                  which(names(con_dat) %in% paste0("bookid.", c(4, 6, 9, 11)))),
+                          dim = rep(2:3, each = 4),
+                          value = 0)
+      
+      # Compute latent regression of the latent ability on the conditioning 
+      # variables (excl. the first column which is the student ID)
+      latreg <- tam.latreg(likeli, Y = con_dat1[, -1], pid = pid.sele,
+                           control = list(maxiter = iter.2, acceleration = "Ramsay"),
+                           beta.fixed = as.matrix(betas))
+    } else {
+      
+      # Compute latent regression of the latent ability on the conditioning 
+      # variables (excl. the first column which is the student ID)
+      latreg <- tam.latreg(likeli, Y = con_dat1[, -1], pid = pid.sele,
+                           control = list(maxiter = iter.2, acceleration = "Ramsay"))
+    }
     
     # Extract the regression coefficients of the conditioning variables, because
     # they are fixed for the core domains in the next step at that value
